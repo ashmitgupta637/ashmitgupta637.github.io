@@ -10,20 +10,69 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0a0e0f;
-  --bg-raised:#0d1214;
-  --surface:#131a1d;
-  --surface-2:#182024;
-  --border:#233036;
-  --text:#c9d1d9;
-  --text-dim:#6b7c85;
+  --bg:#070b12;
+  --bg-raised:#0a0f18;
+  --surface:#0d1420;
+  --surface-2:#121b29;
+  --border:#1e2c3d;
+  --border-bright:#2a3f57;
+  --text:#c3d1e0;
+  --text-dim:#5c7085;
   --text-bright:#eef3f5;
   --green:#39ff88;
   --green-dim:#1f8a4c;
-  --cyan:#5fb3ff;
-  --amber:#f0883e;
+  --cyan:#58a6ff;
+  --amber:#ffa116;
+  --amber-dim:#c17d10;
   --red:#ff5f5f;
+  --glow-green:0 0 12px rgba(57,255,136,0.35);
+  --glow-cyan:0 0 12px rgba(88,166,255,0.3);
+  --glow-amber:0 0 12px rgba(255,161,22,0.3);
   --mono:'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* ---------- theme: coder (clean editor-dark, violet/blue accents) ---------- */
+html[data-theme="coder"]{
+  --bg:#0d1117;
+  --bg-raised:#0f1420;
+  --surface:#111827;
+  --surface-2:#161d2b;
+  --border:#22293a;
+  --border-bright:#33406a;
+  --text:#c3cbe0;
+  --text-dim:#606a85;
+  --text-bright:#f0f3fa;
+  --green:#a78bfa;
+  --green-dim:#6d4fc7;
+  --cyan:#60a5fa;
+  --amber:#f472b6;
+  --amber-dim:#c14f8e;
+  --red:#ff6b81;
+  --glow-green:0 0 12px rgba(167,139,250,0.35);
+  --glow-cyan:0 0 12px rgba(96,165,250,0.3);
+  --glow-amber:0 0 12px rgba(244,114,182,0.3);
+}
+
+/* ---------- theme: engineer (industrial blueprint, amber/navy) ---------- */
+html[data-theme="engineer"]{
+  --bg:#0a1929;
+  --bg-raised:#0d2038;
+  --surface:#0f2740;
+  --surface-2:#153357;
+  --border:#1e3d63;
+  --border-bright:#2f5a8c;
+  --text:#c8d8ea;
+  --text-dim:#5f7fa0;
+  --text-bright:#eef6ff;
+  --green:#ffb347;
+  --green-dim:#c17d10;
+  --cyan:#7fd4ff;
+  --amber:#ff8c42;
+  --amber-dim:#c25f1f;
+  --red:#ff6b6b;
+  --glow-green:0 0 12px rgba(255,179,71,0.35);
+  --glow-cyan:0 0 12px rgba(127,212,255,0.3);
+  --glow-amber:0 0 12px rgba(255,140,66,0.3);
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -42,8 +91,14 @@ body{
   font-size:15px;
   line-height:1.7;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(57,255,136,0.06), transparent),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(57,255,136,0.07), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 20%, rgba(88,166,255,0.05), transparent),
     repeating-linear-gradient(0deg, rgba(255,255,255,0.008) 0px, rgba(255,255,255,0.008) 1px, transparent 1px, transparent 2px);
+}
+
+#matrixRain{
+  position:fixed; inset:0; z-index:-1; pointer-events:none;
+  opacity:0.16; mix-blend-mode:screen;
 }
 
 ::selection{background:var(--green-dim); color:#000;}
@@ -56,7 +111,7 @@ a:hover{text-decoration:underline;}
   outline-offset:3px;
 }
 
-.wrap{max-width:920px; margin:0 auto; padding:0 24px;}
+.wrap{max-width:920px; margin:0 auto; padding:0 24px; position:relative; z-index:1;}
 
 /* ---------- scanline overlay ---------- */
 .scanlines{
@@ -92,16 +147,48 @@ a:hover{text-decoration:underline;}
 @keyframes pulse{0%,100%{opacity:1;} 50%{opacity:0.4;}}
 .navlinks{display:flex; gap:20px; font-size:13px; flex-wrap:wrap;}
 .navlinks a{color:var(--text-dim);}
-.navlinks a:hover{color:var(--green); text-decoration:none;}
+.navlinks a:hover{color:var(--green); text-decoration:none; text-shadow:var(--glow-green);}
+.sync-badge{
+  font-size:10.5px; color:var(--text-dim); display:flex; align-items:center; gap:6px;
+  border:1px solid var(--border); padding:4px 9px; border-radius:100px; white-space:nowrap;
+}
+.sync-badge .dot2{width:6px; height:6px; border-radius:50%; background:var(--green); box-shadow:0 0 6px var(--green); animation:pulse 2s ease-in-out infinite;}
+
+/* ---------- theme switcher ---------- */
+.theme-switcher{
+  display:flex; align-items:center; gap:4px;
+  border:1px solid var(--border); border-radius:100px; padding:3px; background:var(--bg-raised);
+}
+.theme-btn{
+  font-family:var(--mono); font-size:10.5px; color:var(--text-dim); background:transparent;
+  border:1px solid transparent; border-radius:100px; padding:5px 10px; cursor:pointer;
+  display:flex; align-items:center; gap:5px; transition:all .15s ease; white-space:nowrap;
+}
+.theme-btn .swatch{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+.theme-btn[data-theme-btn="hacker"] .swatch{background:#39ff88;}
+.theme-btn[data-theme-btn="coder"] .swatch{background:#a78bfa;}
+.theme-btn[data-theme-btn="engineer"] .swatch{background:#ff8c42;}
+.theme-btn:hover{color:var(--text-bright); background:var(--surface-2);}
+.theme-btn.active{color:var(--text-bright); border-color:var(--border-bright); background:var(--surface); box-shadow:var(--glow-green);}
+.theme-btn.active .swatch{box-shadow:0 0 6px currentColor;}
+@media (max-width:640px){
+  .theme-switcher{order:3; width:100%; justify-content:center;}
+  .theme-btn span.label{display:none;}
+}
 
 /* ---------- hero terminal ---------- */
 .hero{padding:64px 0 40px;}
 .term-window{
   background:var(--surface);
-  border:1px solid var(--border);
+  border:1px solid var(--border-bright);
   border-radius:8px;
   overflow:hidden;
-  box-shadow:0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(57,255,136,0.03);
+  box-shadow:0 20px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(57,255,136,0.04), 0 0 30px -8px rgba(88,166,255,0.15);
+  animation:term-glow 4s ease-in-out infinite;
+}
+@keyframes term-glow{
+  0%,100%{box-shadow:0 20px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(57,255,136,0.04), 0 0 30px -8px rgba(88,166,255,0.15);}
+  50%{box-shadow:0 20px 60px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(57,255,136,0.08), 0 0 40px -6px rgba(57,255,136,0.18);}
 }
 .term-titlebar{
   display:flex; align-items:center; gap:8px;
@@ -145,7 +232,7 @@ section{padding:52px 0;}
   display:flex; align-items:baseline; gap:12px; margin-bottom:26px;
   border-bottom:1px solid var(--border); padding-bottom:12px;
 }
-.section-cmd{color:var(--green); font-size:14px;}
+.section-cmd{color:var(--green); font-size:14px; text-shadow:var(--glow-green);}
 .section-title{color:var(--text-bright); font-size:19px; font-weight:700; letter-spacing:0.01em;}
 .section-sub{color:var(--text-dim); font-size:12.5px; margin-left:auto;}
 
@@ -160,8 +247,9 @@ section{padding:52px 0;}
 .stats-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px;}
 .stat-card{
   background:var(--surface); border:1px solid var(--border); border-radius:8px;
-  padding:18px 20px;
+  padding:18px 20px; transition:border-color .2s ease, box-shadow .2s ease;
 }
+.stat-card:hover{border-color:var(--border-bright); box-shadow:0 0 24px -10px rgba(88,166,255,0.25);}
 .stat-card .label{font-size:11.5px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px; display:flex; align-items:center; gap:8px;}
 .stat-card .label::before{content:'▸'; color:var(--green);}
 .stat-card img{width:100%; border-radius:6px; display:block;}
@@ -169,6 +257,8 @@ section{padding:52px 0;}
 .meter-row .m-label{width:64px; color:var(--text-dim); flex-shrink:0;}
 .meter-track{flex:1; height:8px; background:var(--bg-raised); border-radius:4px; overflow:hidden; border:1px solid var(--border);}
 .meter-fill{height:100%; background:linear-gradient(90deg,var(--green-dim),var(--green)); border-radius:4px; width:0%; transition:width 1.2s cubic-bezier(.16,1,.3,1);}
+.meter-fill.leet{background:linear-gradient(90deg,var(--amber-dim),var(--amber)); box-shadow:var(--glow-amber);}
+.meter-fill.atc{background:linear-gradient(90deg,#2f6fb8,var(--cyan)); box-shadow:var(--glow-cyan);}
 .meter-val{width:42px; text-align:right; color:var(--text-bright); font-variant-numeric:tabular-nums;}
 .gh-loading{color:var(--text-dim); font-size:13px;}
 .gh-loading .cursor{background:var(--text-dim);}
@@ -181,7 +271,7 @@ section{padding:52px 0;}
   transition:border-color .15s ease, transform .15s ease;
   position:relative;
 }
-.proj-card:hover{border-color:var(--green-dim); transform:translateY(-2px);}
+.proj-card:hover{border-color:var(--green-dim); transform:translateY(-2px); box-shadow:0 8px 30px -12px rgba(57,255,136,0.2);}
 .proj-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
 .proj-name{color:var(--text-bright); font-size:15px; font-weight:700;}
 .proj-name a{color:inherit;}
@@ -308,6 +398,8 @@ footer .g{color:var(--green);}
 </style>
 </head>
 <body>
+<script>document.documentElement.setAttribute('data-theme', localStorage.getItem('ash-theme') || 'hacker');</script>
+<canvas id="matrixRain" aria-hidden="true"></canvas>
 <div class="scanlines" aria-hidden="true"></div>
 
 <div class="topbar">
@@ -321,6 +413,11 @@ footer .g{color:var(--green);}
       <a href="#experience">experience</a>
       <a href="#console">console</a>
     </nav>
+    <div class="theme-switcher" role="group" aria-label="Theme switcher">
+      <button class="theme-btn" data-theme-btn="hacker" title="Hacker theme"><span class="swatch"></span><span class="label">hack</span></button>
+      <button class="theme-btn" data-theme-btn="coder" title="Coder theme"><span class="swatch"></span><span class="label">code</span></button>
+      <button class="theme-btn" data-theme-btn="engineer" title="Engineer theme"><span class="swatch"></span><span class="label">eng</span></button>
+    </div>
   </div>
 </div>
 
@@ -355,7 +452,7 @@ footer .g{color:var(--green);}
     </div>
     <div class="about-grid">
       <p>B.Tech in Electronics and Communication Engineering at <strong style="color:var(--text-bright)">Netaji Subhas University of Technology</strong>, expected 2028. I split my time between competitive programming — 250+ problems deep across LeetCode, GeeksforGeeks, and AtCoder — and hardware builds that go from breadboard to working circuit.</p>
-      <p>Currently an Electronics Engineering Intern at BHEL, Noida, where I dig into industrial circuit schematics, power supply units, and PLC/SCADA workflows.</p>
+      <p>Completed an Electronics Engineering Internship at BHEL, Noida (Jun 2026 – 9 Jul 2026), where I dug into industrial circuit schematics, power supply units, and PLC/SCADA workflows.</p>
       <dl class="kv">
         <dt>degree</dt><dd>B.Tech, Electronics & Communication Engineering</dd>
         <dt>university</dt><dd>Netaji Subhas University of Technology (NSUT), Delhi</dd>
@@ -371,7 +468,7 @@ footer .g{color:var(--green);}
     <div class="section-head">
       <span class="section-cmd">$</span>
       <h2 class="section-title" id="stats-h">fetch --stats --live</h2>
-      <span class="section-sub">GitHub live · LeetCode auto-synced</span>
+      <span class="section-sub sync-badge"><span class="dot2"></span> auto-syncing · last pull <span id="lastSync">just now</span></span>
     </div>
     <div class="stats-grid">
       <div class="stat-card">
@@ -383,11 +480,11 @@ footer .g{color:var(--green);}
         <img src="https://leetcard.jacoblin.cool/AshNova?theme=dark&font=JetBrains%20Mono&extend=false&border=false" alt="LeetCode stats for AshNova" loading="lazy">
       </div>
       <div class="stat-card">
-        <div class="label">problem archive</div>
-        <div class="meter-row"><span class="m-label">LeetCode</span><div class="meter-track"><div class="meter-fill" data-target="70"></div></div><span class="meter-val">150+</span></div>
+        <div class="label">problem archive // cross-platform</div>
+        <div class="meter-row"><span class="m-label">LeetCode</span><div class="meter-track"><div class="meter-fill leet" data-target="70" data-fallback="150+"></div></div><span class="meter-val" id="leetVal">150+</span></div>
         <div class="meter-row"><span class="m-label">GfG</span><div class="meter-track"><div class="meter-fill" data-target="45"></div></div><span class="meter-val">60+</span></div>
-        <div class="meter-row"><span class="m-label">AtCoder</span><div class="meter-track"><div class="meter-fill" data-target="30"></div></div><span class="meter-val">40+</span></div>
-        <p style="font-size:11.5px; color:var(--text-dim); margin-top:10px;">250+ problems solved across platforms</p>
+        <div class="meter-row"><span class="m-label">AtCoder</span><div class="meter-track"><div class="meter-fill atc" data-target="30" data-fallback="40+"></div></div><span class="meter-val" id="atcVal">40+</span></div>
+        <p style="font-size:11.5px; color:var(--text-dim); margin-top:10px;" id="archiveNote">250+ problems solved across platforms · pulled live from LeetCode &amp; AtCoder public APIs, GitHub REST API</p>
       </div>
     </div>
   </section>
@@ -531,9 +628,9 @@ footer .g{color:var(--green);}
     </div>
     <div class="timeline">
       <div class="tl-item">
-        <div class="tl-date">Jun 2026 — present</div>
+        <div class="tl-date">Jun 2026 — 9 Jul 2026</div>
         <div>
-          <div class="tl-role">Electronics Engineering Intern</div>
+          <div class="tl-role">Electronics Engineering Intern <span class="tag" style="margin-left:6px;">completed</span></div>
           <div class="tl-org">BHEL, Noida</div>
           <ul class="tl-desc">
             <li>Analyzed industrial circuit schematics and power supply units to improve fault diagnosis across electrical systems.</li>
@@ -598,7 +695,7 @@ footer .g{color:var(--green);}
         <input id="consoleInput" type="text" autocomplete="off" spellcheck="false" aria-label="Terminal command input" placeholder="type a command...">
       </div>
     </div>
-    <p class="console-hint">try: help · whoami · resume · projects · hardware · contact · sudo · clear</p>
+    <p class="console-hint">try: help · whoami · resume · projects · hardware · contact · theme coder · sudo · clear</p>
   </div>
 </div>
 
@@ -614,7 +711,7 @@ const bootLines = [
   { cmd: "whoami" },
   { out: "<span class='hl'>Ashmit Gupta</span> — B.Tech ECE @ NSUT · Competitive Programmer" },
   { cmd: "cat role.txt" },
-  { out: "Electronics Engineering Intern <span class='a'>@ BHEL, Noida</span> · <span class='g'>250+</span> DSA problems solved" },
+  { out: "Ex-Electronics Engineering Intern <span class='a'>@ BHEL, Noida</span> <span style='color:var(--text-dim)'>(completed 9 Jul 2026)</span> · <span class='g'>250+</span> DSA problems solved" },
   { cmd: "./run --intro" },
   { out: "Building things that compile <span class='g'>and</span> things that conduct.<span class='cursor'></span>" },
 ];
@@ -704,6 +801,130 @@ async function loadGithubStats(){
 }
 loadGithubStats();
 
+/* ---------------- live LeetCode solved count ---------------- */
+async function loadLeetCodeStats(){
+  const leetMeter = document.querySelector('.meter-fill.leet');
+  const leetVal = document.getElementById('leetVal');
+  try {
+    const res = await fetch('https://alfa-leetcode-api.onrender.com/AshNova/solved');
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    const solved = data.solvedProblem ?? data.totalSolved;
+    if (!solved) throw new Error('no data');
+    leetVal.textContent = solved + '+';
+    if (leetMeter) leetMeter.dataset.target = Math.min(Math.round((solved/220)*100), 100);
+  } catch (err){
+    // API unreachable — keep the static fallback numbers already in the markup
+  }
+}
+
+/* ---------------- live AtCoder solved count ---------------- */
+async function loadAtCoderStats(){
+  const atcMeter = document.querySelector('.meter-fill.atc');
+  const atcVal = document.getElementById('atcVal');
+  try {
+    const res = await fetch('https://kenkoooo.com/atcoder/atcoder-api/v3/user/ac_rank?user=ashmit_gupta');
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    const solved = data.count;
+    if (!solved) throw new Error('no data');
+    atcVal.textContent = solved + '+';
+    if (atcMeter) atcMeter.dataset.target = Math.min(Math.round((solved/80)*100), 100);
+  } catch (err){
+    // API unreachable — keep the static fallback numbers already in the markup
+  }
+}
+
+/* ---------------- keep the scroll-triggered meters in sync with live data ---------------- */
+function refreshMeters(){
+  document.querySelectorAll('.meter-fill[data-target]').forEach(el => {
+    el.style.width = el.dataset.target + '%';
+  });
+}
+
+let lastSyncTime = new Date();
+function tickLastSync(){
+  const el = document.getElementById('lastSync');
+  if (!el) return;
+  const secs = Math.round((new Date() - lastSyncTime) / 1000);
+  if (secs < 60) el.textContent = secs <= 5 ? 'just now' : secs + 's ago';
+  else el.textContent = Math.round(secs/60) + 'm ago';
+}
+setInterval(tickLastSync, 1000);
+
+async function syncAllLiveStats(){
+  await Promise.all([loadGithubStats(), loadLeetCodeStats(), loadAtCoderStats()]);
+  refreshMeters();
+  lastSyncTime = new Date();
+  tickLastSync();
+}
+syncAllLiveStats();
+setInterval(syncAllLiveStats, 5 * 60 * 1000); // re-pull GitHub/LeetCode/AtCoder every 5 min without a reload
+
+/* ---------------- theme switcher ---------------- */
+const THEME_PALETTES = {
+  hacker:   { bg:'rgba(7,11,18,0.12)',   bright:'#eef3f5', a:'rgba(88,166,255,0.8)',  b:'rgba(57,255,136,0.7)' },
+  coder:    { bg:'rgba(13,17,23,0.14)',  bright:'#f0f3fa', a:'rgba(96,165,250,0.8)',  b:'rgba(167,139,250,0.75)' },
+  engineer: { bg:'rgba(10,25,41,0.14)',  bright:'#eef6ff', a:'rgba(127,212,255,0.8)', b:'rgba(255,179,71,0.75)' },
+};
+
+function applyTheme(name){
+  if (!THEME_PALETTES[name]) name = 'hacker';
+  document.documentElement.setAttribute('data-theme', name);
+  localStorage.setItem('ash-theme', name);
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.themeBtn === name);
+  });
+  window.currentMatrixPalette = THEME_PALETTES[name];
+}
+
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyTheme(btn.dataset.themeBtn));
+});
+
+applyTheme(document.documentElement.getAttribute('data-theme') || 'hacker');
+
+/* ---------------- matrix rain background ---------------- */
+(function matrixRain(){
+  const canvas = document.getElementById('matrixRain');
+  const ctx = canvas.getContext('2d');
+  let cols, drops;
+  const glyphs = '01アシュミットガプタ<>{}[]/*+-;=#$%&'.split('');
+
+  function resize(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    cols = Math.floor(canvas.width / 16);
+    drops = new Array(cols).fill(0).map(() => Math.random() * -50);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function draw(){
+    const palette = window.currentMatrixPalette || THEME_PALETTES.hacker;
+    ctx.fillStyle = palette.bg;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '14px monospace';
+    for (let i = 0; i < cols; i++){
+      const text = glyphs[Math.floor(Math.random() * glyphs.length)];
+      const x = i * 16;
+      const y = drops[i] * 16;
+      const fade = Math.random();
+      ctx.fillStyle = fade > 0.96 ? palette.bright : (i % 3 === 0 ? palette.a : palette.b);
+      ctx.fillText(text, x, y);
+      if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+      drops[i]++;
+    }
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduceMotion){
+    setInterval(draw, 55);
+  } else {
+    canvas.style.display = 'none';
+  }
+})();
+
 /* ---------------- interactive console ---------------- */
 const consoleBody = document.getElementById('consoleBody');
 const consoleInput = document.getElementById('consoleInput');
@@ -724,9 +945,24 @@ const commands = {
   <span class="g">hardware</span>     — jump to ECE builds
   <span class="g">stats</span>        — jump to live stats
   <span class="g">contact</span>      — get in touch
+  <span class="g">theme</span>        — switch site theme (hacker / coder / engineer)
   <span class="g">sudo</span>         — try it
   <span class="g">clear</span>        — clear the console`,
-  whoami: () => `<span class="c">Ashmit Gupta</span> — B.Tech ECE @ NSUT (2028) · Competitive programmer, 250+ problems solved · Electronics Intern @ BHEL`,
+  theme: (arg) => {
+    const valid = ['hacker', 'coder', 'engineer'];
+    if (!arg){
+      const current = document.documentElement.getAttribute('data-theme') || 'hacker';
+      return `current theme: <span class="g">${current}</span>
+  usage: <span class="g">theme &lt;name&gt;</span>
+  available: <span class="c">hacker</span> · <span class="c">coder</span> · <span class="c">engineer</span>`;
+    }
+    if (!valid.includes(arg)){
+      return `unknown theme: <span class="g">${arg}</span> — try <span class="c">hacker</span>, <span class="c">coder</span>, or <span class="c">engineer</span>`;
+    }
+    applyTheme(arg);
+    return `theme switched to <span class="g">${arg}</span> ✓`;
+  },
+  whoami: () => `<span class="c">Ashmit Gupta</span> — B.Tech ECE @ NSUT (2028) · Competitive programmer, 250+ problems solved · Ex-Electronics Intern @ BHEL (completed 9 Jul 2026)`,
   resume: () => { window.open('https://www.linkedin.com/in/ashmit-gupta-a619a6285/', '_blank'); return `opening resume / LinkedIn in a new tab...`; },
   projects: () => { document.getElementById('projects').scrollIntoView({behavior:'smooth'}); return `→ scrolling to <span class="g">./projects</span>`; },
   hardware: () => { document.getElementById('hardware').scrollIntoView({behavior:'smooth'}); return `→ scrolling to <span class="a">./hardware</span>`; },
@@ -735,16 +971,19 @@ const commands = {
   <span class="c">linkedin:</span> <a href="https://www.linkedin.com/in/ashmit-gupta-a619a6285/" target="_blank" rel="noopener">ashmit-gupta-a619a6285</a>
   <span class="c">github:</span> <a href="https://github.com/ashmitgupta637" target="_blank" rel="noopener">ashmitgupta637</a>`,
   sudo: () => `Nice try. Permission denied — but I appreciate the ambition. <span class="g">:)</span>`,
-  ls: () => `about.txt  stats/  projects/  hardware/  experience.log  achievements.txt`,
+  ls: () => `about.txt  stats/  projects/  hardware/  experience.log  achievements.txt  theme.cfg`,
   clear: () => { consoleBody.innerHTML = ''; return null; },
 };
 
 function runCommand(raw){
-  const cmd = raw.trim().toLowerCase();
-  if (!cmd) return;
-  printLine(cmd, 'cmd');
+  const trimmed = raw.trim();
+  if (!trimmed) return;
+  printLine(trimmed, 'cmd');
+  const parts = trimmed.toLowerCase().split(/\s+/);
+  const cmd = parts[0];
+  const arg = parts[1];
   if (commands[cmd]){
-    const out = commands[cmd]();
+    const out = commands[cmd](arg);
     if (out) printLine(out, 'out');
   } else {
     printLine(`command not found: <span class="g">${cmd}</span> — type <span class="g">help</span> for a list`, 'out');
